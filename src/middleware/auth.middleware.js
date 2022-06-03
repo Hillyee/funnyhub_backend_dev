@@ -1,5 +1,6 @@
 const errorTypes = require("../constants/error-types")
 const userService = require("../service/user.service")
+const authService = require('../service/auth.service')
 const md5password = require("../uitls/password-handle")
 const jwt = require("jsonwebtoken")
 const { PUBLIC_KEY } = require("../app/config")
@@ -55,7 +56,27 @@ const verifyAuth = async (ctx, next) => {
   }
 }
 
+const verifyPermission = async (ctx, next) => {
+  // 1.获取参数
+  const [resourceKey] = Object.keys(ctx.params)
+  const tableName = resourceKey.replace('Id', '')
+  const resourceId = ctx.params[resourceKey]
+  const { id } = ctx.user
+
+  // 2.查询是否具备权限
+  try {
+    const isPermission = await authService.checkResource(tableName, resourceId, id)
+    if (!isPermission) throw new Error()
+    await next()
+    
+  } catch (err) {
+    const error = new Error(errorTypes.UNPERMISSION)
+    return ctx.app.emit('error', error, ctx)
+  }
+}
+
 module.exports = {
   verifyLogin,
   verifyAuth,
+  verifyPermission
 }
