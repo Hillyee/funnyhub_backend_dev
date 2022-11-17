@@ -1,17 +1,23 @@
-const fs = require('fs')
+const fs = require("fs")
 const momentService = require("../service/moment.service")
-const fileService = require('../service/file.service')
-const { PICTURE_PATH } = require('../constants/file-types')
+const fileService = require("../service/file.service")
+const { PICTURE_PATH } = require("../constants/file-types")
 
 class MomentController {
   async create(ctx, next) {
     // 1.获取数据
     const userId = ctx.user.id
+    const title = ctx.request.body.title
     const content = ctx.request.body.content
 
     // 2.将数据插入到数据库
-    const result = await momentService.create(userId, content)
-    ctx.body = result
+    const result = await momentService.create(userId, title, content)
+    if (result.affectedRows === 1) {
+      ctx.body = {
+        code: 200,
+        data: "发表动态成功",
+      }
+    }
   }
 
   async detail(ctx, next) {
@@ -22,12 +28,12 @@ class MomentController {
     if (!result) {
       ctx.body = {
         code: 200,
-        data: null
+        data: null,
       }
     } else {
       ctx.body = {
         code: 200,
-        data: result
+        data: result,
       }
     }
   }
@@ -35,7 +41,10 @@ class MomentController {
   async list(ctx, next) {
     const { limit, offset } = ctx.query
     const result = await momentService.getMomentList(limit, offset)
-    ctx.body = result
+    ctx.body = {
+      code: 200,
+      data: result,
+    }
   }
 
   async update(ctx, next) {
@@ -57,19 +66,19 @@ class MomentController {
   async addLabels(ctx, next) {
     const { momentId } = ctx.params
     const { labels } = ctx
-    console.log(labels);
+    console.log(labels)
     // 添加所有的标签
     for (let label of labels) {
       // 判断标签是否已经跟动态有关系
       const isExist = await momentService.hasLabel(momentId, label.id)
       if (!isExist) {
         await momentService.addLabel(momentId, label.id)
-      } 
+      }
     }
 
     ctx.body = {
-      code: 200, 
-      message: '给动态添加标签成功'
+      code: 200,
+      message: "给动态添加标签成功",
     }
   }
 
@@ -80,13 +89,13 @@ class MomentController {
 
       const { type } = ctx.query
       const types = ["small", "middle", "large"]
-      if (types.some(item => item === type)) {
-        filename = filename + '-' + type
+      if (types.some((item) => item === type)) {
+        filename = filename + "-" + type
       }
-      ctx.response.set('content-type', fileInfo.mimetype)
+      ctx.response.set("content-type", fileInfo.mimetype)
       ctx.body = fs.createReadStream(`${PICTURE_PATH}/${filename}`)
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 }

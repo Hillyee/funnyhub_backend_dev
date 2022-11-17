@@ -1,16 +1,20 @@
-const connection = require('../app/database')
+const connection = require("../app/database")
 
 class MomentService {
-  async create(userId, content) {
-    const statement = `INSERT INTO moment (content, user_id) VALUES (?, ?)`
-    const [result] = await connection.execute(statement, [content, userId])
+  async create(userId, title, content) {
+    const statement = `INSERT INTO moment (content, user_id, title) VALUES (?, ?, ?)`
+    const [result] = await connection.execute(statement, [
+      content,
+      userId,
+      title,
+    ])
     return result
   }
 
   async getMomentById(momentId) {
     const statement = `
       SELECT 
-        m.id id, m.content content, m.createAt createTime, m.updateAt updateTime,
+        m.id id, m.content content, m.title title, m.description description, m.createAt createTime, m.updateAt updateTime,
         JSON_OBJECT('id', u.id, 'name', u.name, 'avatarURL', u.avatar_url) author,
         IF(COUNT(l.id), JSON_ARRAYAGG(
           JSON_OBJECT('id', l.id, 'name', l.name)
@@ -30,7 +34,7 @@ class MomentService {
   async getMomentList(limit, offset) {
     const statement = `
       SELECT 
-        m.id id, m.content content, m.createAt createTime, m.updateAt updateTime,
+        m.id id, m.title title,m.content content, m.description description, m.createAt createTime, m.updateAt updateTime,
         JSON_OBJECT('id', u.id, 'name', u.name, 'avatarURL', u.avatar_url) author,
         IF(COUNT(l.id), JSON_ARRAYAGG(
           JSON_OBJECT('id', l.id, 'name', l.name)

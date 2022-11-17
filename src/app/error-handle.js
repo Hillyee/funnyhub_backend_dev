@@ -34,7 +34,10 @@ const errorHandler = (error, ctx) => {
   }
 
   ctx.status = status
-  ctx.body = message
+  ctx.body = {
+    code: status,
+    message: message
+  }
 }
 
 module.exports = errorHandler

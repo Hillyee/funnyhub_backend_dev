@@ -21,6 +21,7 @@ class FileController {
     const files = ctx.req.files
     const { id } = ctx.user
     const { momentId } = ctx.query
+    console.log(momentId);
 
     // 保存到数据库
     for (let file of files) {
