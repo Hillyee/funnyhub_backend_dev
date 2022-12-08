@@ -3,7 +3,7 @@ const { PRIVATE_KEY } = require("../app/config")
 
 class AuthController {
   async login(ctx, next) {
-    const { id, name, avatar_url } = ctx.user
+    const { id, name, email, avatar_url } = ctx.user
 
     const token = jwt.sign({ id, name }, PRIVATE_KEY, {
       expiresIn: "24h",
@@ -12,7 +12,7 @@ class AuthController {
 
     ctx.body = {
       code: 200,
-      data: { id, name, token, userInfo: { avatar_url } },
+      data: { id, name, email, token, userInfo: { avatar_url } },
     }
   }
 

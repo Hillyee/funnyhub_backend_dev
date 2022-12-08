@@ -6,7 +6,7 @@ const errorHandler = (error, ctx) => {
   switch (error.message) {
     case errorTypes.NAME_OR_PASSWORD_IS_REQUIRED:
       status = 400 // Bad Request
-      message = "用户名或者密码不能为空~"
+      message = "用户名、密码、邮箱不能为空~"
       break;
     case errorTypes.USER_ALREADY_EXISTS:
       status = 409 // conflict

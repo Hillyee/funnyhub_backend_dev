@@ -4,10 +4,10 @@ const md5password = require('../uitls/password-handle')
 
 const verifyUser = async (ctx, next) => {
   // 1.获取用户名和密码
-  const { name, password } = ctx.request.body
-
-  // 2.判断用户名或密码不能为空
-  if (!name || !password) {
+  const { name, password, email } = ctx.request.body
+  console.log(name, password);
+  // 2.判断用户名、密码、邮箱不能为空
+  if (!name || !password || !email) {
     const error = new Error(errorTypes.NAME_OR_PASSWORD_IS_REQUIRED)
     return ctx.app.emit('error', error, ctx)
   }
