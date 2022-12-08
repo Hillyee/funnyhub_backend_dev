@@ -1,27 +1,63 @@
 const connection = require("../app/database")
+const { Sequelize, DataTypes, Model, Op } = require('sequelize')
+
+const sequelize = new Sequelize('funnyhub', 'root', 'root', {
+  host: 'localhost',
+  dialect: 'mysql'
+})
+
+class User extends Model { }
+
+User.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: DataTypes.STRING,
+  email: DataTypes.STRING,
+  password: DataTypes.STRING,
+  avatar_url: DataTypes.STRING,
+  createAt: DataTypes.TIME,
+  updateAt: DataTypes.TIME
+}, {
+  tableName: 'user',
+  createdAt: false, // 如果表里没有这个字段就要把它关掉
+  updatedAt: false,
+  sequelize
+})
 
 class UserService {
+
   async create(user) {
     const { name, password, email } = user
-    const statement = `INSERT INTO user (name, password, email) VALUES (?, ?, ?);`
     // 将user存储到数据库中
-    const result = await connection.execute(statement, [name, password, email])
-    return result[0]
+    const res = await User.create({
+      name: name,
+      password: password,
+      email: email
+    })
+    return res
   }
 
   async getUserByName(name) {
-    const statement = `SELECT * FROM user WHERE name = ?;`
-    const result = await connection.execute(statement, [name])
-
-    return result[0]
+    const res = await User.findAll({
+      where: {
+        name: name
+      }
+    })
+    return res
   }
 
   async getUserByEmail(email) {
-    const statement = `SELECT * FROM user WHERE email = ?;`
-    const result = await connection.execute(statement, [email])
-
-    return result[0]
+    const res = await User.findAll({
+      where: {
+        email: email
+      }
+    })
+    return res
   }
+
 
   async updateAvatarUrlById(avatarUrl, userId) {
     const statement = `UPDATE user SET avatar_url = ? WHERE id = ?;`

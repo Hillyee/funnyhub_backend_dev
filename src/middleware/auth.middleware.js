@@ -7,21 +7,19 @@ const { PUBLIC_KEY } = require("../app/config")
 
 const verifyLogin = async (ctx, next) => {
   // 1.获取用户名和密码
-  // const { name, password, email } = ctx.request.body
   const { email, password } = ctx.request.body
 
-  // 2.判断用户名和密码是否为空
+  // 2.判断用户名和邮箱是否为空
   if (!password || !email) {
-    const error = new Error(errorTypes.NAME_OR_PASSWORD_IS_REQUIRED)
+    const error = new Error(errorTypes.EMAIL_OR_PASSWORD_IS_REQUIRED)
     return ctx.app.emit("error", error, ctx)
   }
 
   // 3.判断用户是否存在
-  // const result = await userService.getUserByName(name)
   const result = await userService.getUserByEmail(email)
 
-  const user = result[0]
-  if (!user) {
+  const user = result[0].dataValues
+  if (JSON.stringify(user) === "{}") {
     const error = new Error(errorTypes.USER_DOES_NOT_EXISTS)
     return ctx.app.emit("error", error, ctx)
   }
