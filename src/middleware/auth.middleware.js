@@ -15,7 +15,7 @@ const verifyLogin = async (ctx, next) => {
     return ctx.app.emit("error", error, ctx)
   }
 
-  // 3.判断用户是否存在
+  // 3.判断用户是否存在(根据邮箱)
   const result = await userService.getUserByEmail(email)
 
   const user = result[0].dataValues
@@ -27,6 +27,7 @@ const verifyLogin = async (ctx, next) => {
   // 4.判断密码是否和数据库中的密码是一致(加密)
   if (md5password(password) !== user.password) {
     const error = new Error(errorTypes.PASSWORD_IS_INCORRENT)
+
     return ctx.app.emit("error", error, ctx)
   }
   ctx.user = user
@@ -34,6 +35,7 @@ const verifyLogin = async (ctx, next) => {
 }
 
 const verifyAuth = async (ctx, next) => {
+
   // 1.获取token
   const authorization = ctx.headers.authorization
   if (!authorization) {
@@ -52,6 +54,7 @@ const verifyAuth = async (ctx, next) => {
     ctx.user = result
     await next()
   } catch (err) {
+    console.log(err);
     const error = new Error(errorTypes.UNAUTHORIZATION)
     ctx.app.emit("error", error, ctx)
   }

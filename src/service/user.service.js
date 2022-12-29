@@ -1,10 +1,5 @@
-const connection = require("../app/database")
-const { Sequelize, DataTypes, Model, Op } = require('sequelize')
-
-const sequelize = new Sequelize('funnyhub', 'root', 'root', {
-  host: 'localhost',
-  dialect: 'mysql'
-})
+const { connection, sequelize } = require("../app/database")
+const { DataTypes, Model } = require('sequelize')
 
 class User extends Model { }
 
@@ -60,9 +55,14 @@ class UserService {
 
 
   async updateAvatarUrlById(avatarUrl, userId) {
-    const statement = `UPDATE user SET avatar_url = ? WHERE id = ?;`
-    const result = await connection.execute(statement, [avatarUrl, userId])
-    return result
+    const res = User.update({
+      avatar_url: avatarUrl
+    }, {
+      where: {
+        id: userId
+      }
+    })
+    return res
   }
 }
 

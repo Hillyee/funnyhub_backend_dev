@@ -2,6 +2,13 @@ const mysql = require("mysql2")
 
 const config = require('./config')
 
+const { Sequelize } = require('sequelize')
+
+const sequelize = new Sequelize('funnyhub', 'root', 'root', {
+  host: 'localhost',
+  dialect: 'mysql'
+})
+
 const connections = mysql.createPool({
   host: config.MYSQL_HOST,
   port: config.MYSQL_PORT,
@@ -20,4 +27,7 @@ connections.getConnection((err, conn) => {
   })
 })
 
-module.exports = connections.promise()
+module.exports = {
+  connection: connections.promise(),
+  sequelize
+}

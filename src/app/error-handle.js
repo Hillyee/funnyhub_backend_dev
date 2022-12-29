@@ -8,9 +8,9 @@ const errorHandler = (error, ctx) => {
       status = 400 // Bad Request
       message = "用户名或密码、邮箱不能为空~"
       break;
-    case errorTypes.USER_ALREADY_EXISTS:
+    case errorTypes.EMAIL_ALREADY_EXISTS:
       status = 409 // conflict
-      message = '用户名已经存在~'
+      message = '该邮箱已被注册过'
       break;
     case errorTypes.USER_DOES_NOT_EXISTS:
       status = 400; // 参数错误
@@ -33,11 +33,12 @@ const errorHandler = (error, ctx) => {
       message = "NOT FOUND"
   }
 
-  ctx.status = status
   ctx.body = {
     code: status,
     message: message
   }
+
+  return ctx.body
 }
 
 module.exports = errorHandler

@@ -15,7 +15,8 @@ class MomentController {
     if (result.affectedRows === 1) {
       ctx.body = {
         code: 200,
-        data: "发表动态成功",
+        message: "发表动态成功",
+        data: null
       }
     }
   }

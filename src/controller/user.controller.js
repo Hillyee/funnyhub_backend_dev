@@ -12,13 +12,15 @@ class UserController {
     // 返回数据
     ctx.body = {
       code: 200,
-      message: '注册成功'
+      message: '注册成功',
+      data: null
     }
   }
 
   async avatarInfo(ctx, next) {
     const { userId } = ctx.params
-    const avatarInfo = await fileService.getAvatarByUserId(userId)
+    const result = await fileService.getAvatarByUserId(userId)
+    const avatarInfo = result[0].dataValues
     ctx.response.set("content-type", avatarInfo.mimetype)
     ctx.body = fs.createReadStream(`${AVATAR_PATH}/${avatarInfo.filename}`)
   }

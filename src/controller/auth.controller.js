@@ -12,7 +12,7 @@ class AuthController {
 
     ctx.body = {
       code: 200,
-      data: { id, name, email, token, userInfo: { avatar_url } },
+      data: { id, name, email, token, avatar_url },
     }
   }
 

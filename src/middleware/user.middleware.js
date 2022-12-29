@@ -8,15 +8,15 @@ const verifyUser = async (ctx, next) => {
 
   // 2.判断用户名、密码、邮箱不能为空
   if (!name || !password || !email) {
-    const error = new Error(errorTypes.NAME_OR_PASSWORD_IS_REQUIRED)
+    const error = new Error(errorTypes.USER_ALREADY_EXISTS)
     return ctx.app.emit('error', error, ctx)
   }
 
-  // 3.判断这次注册的用户名是否被注册过
-  const result = await service.getUserByName(name)
+  // 3.判断这次注册的邮箱是否被注册过
+  const result = await service.getUserByEmail(email)
   // 如果查询结果不为空
   if (result.length) {
-    const error = new Error(errorTypes.USER_ALREADY_EXISTS)
+    const error = new Error(errorTypes.EMAIL_ALREADY_EXISTS)
     return ctx.app.emit('error', error, ctx)
   }
 
