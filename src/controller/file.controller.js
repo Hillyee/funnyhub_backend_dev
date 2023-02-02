@@ -1,5 +1,6 @@
 const fileService = require('../service/file.service')
 const userService = require('../service/user.service')
+const momentService = require('../service/moment.service')
 const { APP_HOST, APP_PORT } = require('../app/config')
 class FileController {
   async saveAvatarInfo(ctx, next) {
@@ -13,7 +14,7 @@ class FileController {
     }
     // 将图片地址保存到user表中
     const avatarUrl = `${APP_HOST}:${APP_PORT}/users/${id}/avatar`
-    userService.updateAvatarUrlById(avatarUrl, id)
+    await userService.updateAvatarUrlById(avatarUrl, id)
 
     ctx.body = {
       code: 200,
@@ -23,20 +24,25 @@ class FileController {
   }
 
   async savePictureInfo(ctx, next) {
-    const files = ctx.req.files
+    const file = ctx.req.file
     const { id } = ctx.user
-    const { momentId } = ctx.query
+    // const { momentId } = ctx.query
 
-    // 保存到数据库
-    for (let file of files) {
-      const { filename, mimetype, size } = file;
-      await fileService.createFile(filename, mimetype, size, id, momentId)
-    }
+    // 保存到数据库(file表)
+    const { filename, mimetype, size } = file;
+    await fileService.createFile(filename, mimetype, size, id)
 
+    // 将图片地址保存到moment表
+    let type = 'small'
+    const fileUrl = `${APP_HOST}:${APP_PORT}/moment/images/${filename}?type=${type}`
+    // const res = await momentService.updateMomentPicUrlById(fileUrl, momentId)
     ctx.body = {
       code: 200,
-      message: "上传动态配图成功",
-      data: null
+      message: "上传配图成功",
+      data: {
+        // momentId,
+        url: fileUrl
+      }
     }
   }
 }

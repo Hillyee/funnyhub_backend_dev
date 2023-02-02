@@ -13,13 +13,14 @@ User.init({
   email: DataTypes.STRING,
   password: DataTypes.STRING,
   avatar_url: DataTypes.STRING,
+  sign: DataTypes.STRING,
   createAt: DataTypes.TIME,
   updateAt: DataTypes.TIME
 }, {
   tableName: 'user',
+  sequelize: sequelize,
   createdAt: false, // 如果表里没有这个字段就要把它关掉
-  updatedAt: false,
-  sequelize
+  updatedAt: false
 })
 
 class UserService {
@@ -60,6 +61,29 @@ class UserService {
     }, {
       where: {
         id: userId
+      }
+    })
+    return res
+  }
+
+  async getUserById(id) {
+    const res = await User.findAll({
+      attributes: ['id', 'name', ['avatar_url', 'avatarUrl'], 'email', 'sign'],
+      where: {
+        id: id
+      }
+    })
+    return res[0].dataValues
+  }
+
+  async updateUserById(id, name, email, sign) {
+    const res = User.update({
+      name: name,
+      email: email,
+      sign: sign
+    }, {
+      where: {
+        id: id
       }
     })
     return res

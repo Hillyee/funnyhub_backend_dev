@@ -9,14 +9,16 @@ class MomentController {
     const userId = ctx.user.id
     const title = ctx.request.body.title
     const content = ctx.request.body.content
+    const description = ctx.request.body.description || ''
+    const momentUrl = ctx.request.body.momentUrl
 
     // 2.将数据插入到数据库
-    const result = await momentService.create(userId, title, content)
-    if (result.affectedRows === 1) {
+    const result = await momentService.create(userId, title, content, description, momentUrl)
+    if (result.dataValues.id) {
       ctx.body = {
         code: 200,
-        message: "发表动态成功",
-        data: null
+        message: "发表成功",
+        data: { id: result.dataValues.id }
       }
     }
   }
@@ -48,6 +50,16 @@ class MomentController {
     }
   }
 
+  async userList(ctx, next) {
+    // const { limit } = ctx.request.query
+    const id = ctx.params.userId
+    const result = await momentService.getUserMomentList(id)
+    ctx.body = {
+      code: 200,
+      data: result.rows
+    }
+  }
+
   async update(ctx, next) {
     const { momentId } = ctx.params
     const { content } = ctx.request.body
@@ -67,7 +79,6 @@ class MomentController {
   async addLabels(ctx, next) {
     const { momentId } = ctx.params
     const { labels } = ctx
-    console.log(labels)
     // 添加所有的标签
     for (let label of labels) {
       // 判断标签是否已经跟动态有关系
@@ -87,13 +98,12 @@ class MomentController {
     try {
       let { filename } = ctx.params
       const fileInfo = await fileService.getFileByFilename(filename)
-
       const { type } = ctx.query
       const types = ["small", "middle", "large"]
       if (types.some((item) => item === type)) {
         filename = filename + "-" + type
       }
-      ctx.response.set("content-type", fileInfo.mimetype)
+      ctx.response.set("content-type", fileInfo[0].dataValues.mimetype)
       ctx.body = fs.createReadStream(`${PICTURE_PATH}/${filename}`)
     } catch (error) {
       console.log(error)

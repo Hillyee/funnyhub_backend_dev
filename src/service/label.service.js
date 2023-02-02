@@ -1,10 +1,31 @@
-const connection = require('../app/database');
+const { connection, sequelize } = require('../app/database');
+
+const { DataTypes, Model } = require('sequelize')
+
+class Label extends Model { }
+
+Label.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING
+  }
+}, {
+  tableName: 'label',
+  createdAt: false, // 如果表里没有这个字段就要把它关掉
+  updatedAt: false,
+  sequelize
+})
 
 class LabelService {
   async create(name) {
-    const statement = `INSERT INTO label (name) VALUES (?);`;
-    const [result] = await connection.execute(statement, [name]);
-    return result;
+    const res = await Label.create({
+      name: name
+    })
+    return res
   }
 
   async getLabelByName(name) {

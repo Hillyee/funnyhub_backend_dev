@@ -2,6 +2,7 @@ const { connection, sequelize } = require("../app/database")
 const { DataTypes, Model } = require('sequelize')
 
 class Avatar extends Model { }
+class File extends Model { }
 
 Avatar.init({
   id: {
@@ -17,6 +18,26 @@ Avatar.init({
   updateAt: DataTypes.TIME,
 }, {
   tableName: 'avatar',
+  createdAt: false, // 如果表里没有这个字段就要把它关掉
+  updatedAt: false,
+  sequelize
+})
+
+File.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  filename: DataTypes.STRING,
+  mimetype: DataTypes.STRING,
+  size: DataTypes.INTEGER,
+  moment_id: DataTypes.INTEGER,
+  user_id: DataTypes.INTEGER,
+  createAt: DataTypes.TIME,
+  updateAt: DataTypes.TIME,
+}, {
+  tableName: 'file',
   createdAt: false, // 如果表里没有这个字段就要把它关掉
   updatedAt: false,
   sequelize
@@ -66,16 +87,23 @@ class FileService {
     return result
   }
 
-  async createFile(filename, mimetype, size, userId, momentId) {
-    const statement = `INSERT INTO file (filename, mimetype, size, user_id, moment_id) VALUES (?, ?, ?, ?, ?);`
-    const [result] = await connection.execute(statement, [filename, mimetype, size, userId, momentId])
+  async createFile(filename, mimetype, size, userId) {
+    const result = File.create({
+      filename,
+      mimetype,
+      size,
+      user_id: userId
+    })
     return result
   }
 
   async getFileByFilename(filename) {
-    const statement = `SELECT * FROM file WHERE filename = ?;`
-    const [result] = await connection.execute(statement, [filename])
-    return result[0]
+    const result = File.findAll({
+      where: {
+        filename: filename
+      }
+    })
+    return result
   }
 }
 

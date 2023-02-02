@@ -12,7 +12,8 @@ class AuthController {
 
     ctx.body = {
       code: 200,
-      data: { id, name, email, token, avatar_url },
+      data: { token },
+      message: "请求成功"
     }
   }
 

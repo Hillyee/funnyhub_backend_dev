@@ -24,6 +24,43 @@ class UserController {
     ctx.response.set("content-type", avatarInfo.mimetype)
     ctx.body = fs.createReadStream(`${AVATAR_PATH}/${avatarInfo.filename}`)
   }
+
+  // 根据token获取用户信息
+  async currentUserInfo(ctx, next) {
+    const { id } = ctx.user
+    const result = await userService.getUserById(id)
+    ctx.body = {
+      code: 200,
+      data: result
+    }
+  }
+
+  async userInfo(ctx, next) {
+    const { id } = ctx.params
+    const result = await userService.getUserById(id)
+    ctx.body = {
+      code: 200,
+      data: result
+    }
+  }
+
+  async update(ctx, next) {
+    const { id, name, email, sign } = ctx.request.body
+    const result = await userService.updateUserById(id, name, email, sign)
+    if (result[0] == 0) {
+      ctx.body = {
+        code: 400,
+        data: null,
+        message: '修改用户信息失败'
+      }
+    } else {
+      ctx.body = {
+        code: 200,
+        data: { id, name, email, sign },
+        message: '修改用户信息成功'
+      }
+    }
+  }
 }
 
 module.exports = new UserController()

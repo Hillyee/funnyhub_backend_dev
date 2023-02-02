@@ -6,6 +6,6 @@ const { saveAvatarInfo, savePictureInfo } = require('../controller/file.controll
 const fileRouter = new Router({ prefix: '/upload' })
 
 fileRouter.post('/avatar', verifyAuth, avatarHandler, saveAvatarInfo)
-fileRouter.post('/picture', verifyAuth, pictureHandler, pictureResize ,savePictureInfo)
+fileRouter.post('/picture', verifyAuth, pictureHandler, pictureResize, savePictureInfo)
 
 module.exports = fileRouter

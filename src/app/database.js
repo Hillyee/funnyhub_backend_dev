@@ -2,7 +2,7 @@ const mysql = require("mysql2")
 
 const config = require('./config')
 
-const { Sequelize } = require('sequelize')
+const Sequelize = require('sequelize')
 
 const sequelize = new Sequelize('funnyhub', 'root', 'root', {
   host: 'localhost',
