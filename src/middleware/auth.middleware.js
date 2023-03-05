@@ -66,6 +66,7 @@ const verifyPermission = async (ctx, next) => {
   const tableName = resourceKey.replace('Id', '')
   const resourceId = ctx.params[resourceKey]
   const { id } = ctx.user
+  console.log(id, resourceId);
 
   // 2.查询是否具备权限
   try {

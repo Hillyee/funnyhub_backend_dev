@@ -62,18 +62,31 @@ class MomentController {
 
   async update(ctx, next) {
     const { momentId } = ctx.params
-    const { content } = ctx.request.body
+    const { content, title, description, momentUrl } = ctx.request.body
 
-    const result = await momentService.update(content, momentId)
+    const result = await momentService.update(momentId, content, title, description, momentUrl)
 
-    ctx.body = result
+    ctx.body = {
+      code: 200,
+      message: '修改成功',
+      data: {
+        id: momentId,
+        content,
+        title,
+        description,
+        momentUrl
+      }
+    }
   }
 
   async remove(ctx, next) {
     const { momentId } = ctx.params
 
-    const result = await momentService.remove(momentId)
-    ctx.body = result
+    await momentService.remove(momentId)
+    ctx.body = {
+      code: 200,
+      message: '删除成功'
+    }
   }
 
   async addLabels(ctx, next) {
@@ -107,6 +120,15 @@ class MomentController {
       ctx.body = fs.createReadStream(`${PICTURE_PATH}/${filename}`)
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  async fuzzyList(ctx, next) {
+    const { word, limit, offset } = ctx.query
+    const momentList = await momentService.search(word, limit, offset)
+    ctx.body = {
+      code: 200,
+      data: momentList
     }
   }
 }

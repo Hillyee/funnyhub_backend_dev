@@ -1,4 +1,4 @@
-const connection = require("../app/database")
+const { connection } = require("../app/database")
 
 class CommentService {
   async create(momentId, content, userId) {

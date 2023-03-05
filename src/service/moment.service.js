@@ -1,5 +1,5 @@
 const { connection, sequelize } = require("../app/database")
-const { DataTypes, Model } = require('sequelize')
+const { DataTypes, Model, Op } = require('sequelize')
 
 class Moment extends Model { }
 Moment.init({
@@ -53,6 +53,58 @@ class MomentService {
     })
     return res
   }
+
+  async update(momentId, content, title, description, momentUrl) {
+    const res = await Moment.update({
+      title: title,
+      content: content,
+      description: description,
+      moment_url: momentUrl
+    }, {
+      where: {
+        id: momentId
+      }
+    })
+    return res
+  }
+
+  async remove(momentId) {
+    const res = Moment.destroy({
+      where: {
+        id: momentId
+      }
+    })
+    return res
+  }
+
+  // 模糊查询文章内容
+  async search(wd, limit, offset) {
+    const res = await Moment.findAll({
+      limit: limit - 0,
+      offset: offset - 0,
+      where: {
+        [Op.or]: [
+          {
+            content: {
+              [Op.substring]: `${wd}`
+            }
+          },
+          {
+            title: {
+              [Op.substring]: `${wd}`
+            }
+          },
+          {
+            description: {
+              [Op.substring]: `${wd}`
+            }
+          }
+        ]
+      },
+    })
+    return res
+  }
+
   // (SELECT JSON_ARRAYAGG(CONCAT('http://localhost:8888/moment/images/', file.filename)) FROM file WHERE m.id = file.moment_id) images
   async getMomentById(momentId) {
     const statement = `
@@ -76,7 +128,7 @@ class MomentService {
   async getMomentList(limit, offset) {
     const statement = `
       SELECT 
-        m.id id, m.title title,m.content content, m.description description, m.createAt createTime, m.updateAt updateTime,
+        m.id id, m.title title,m.content content, m.description description, m.createAt createTime, m.updateAt updateTime, m.moment_url momentUrl,
         JSON_OBJECT('id', u.id, 'name', u.name, 'avatarURL', u.avatar_url) author,
         IF(COUNT(l.id), JSON_ARRAYAGG(
           JSON_OBJECT('id', l.id, 'name', l.name)
@@ -90,18 +142,6 @@ class MomentService {
       LIMIT ? OFFSET ?;
     `
     const [result] = await connection.execute(statement, [limit, offset])
-    return result
-  }
-
-  async update(content, momentId) {
-    const statement = `UPDATE moment SET content = ? WHERE id = ?;`
-    const [result] = await connection.execute(statement, [content, momentId])
-    return result
-  }
-
-  async remove(momentId) {
-    const statement = `DELETE FROM moment WHERE id = ?;`
-    const [result] = await connection.execute(statement, [momentId])
     return result
   }
 
