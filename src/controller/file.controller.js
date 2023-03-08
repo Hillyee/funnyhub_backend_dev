@@ -1,6 +1,6 @@
 const fileService = require('../service/file.service')
-const userService = require('../service/user.service')
-const momentService = require('../service/moment.service')
+const { userService } = require('../service/user.service')
+const { momentService } = require('../service/moment.service')
 const { APP_HOST, APP_PORT } = require('../app/config')
 class FileController {
   async saveAvatarInfo(ctx, next) {

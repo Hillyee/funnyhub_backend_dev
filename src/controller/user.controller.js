@@ -1,6 +1,6 @@
 const fs = require('fs')
 const fileService = require("../service/file.service")
-const userService = require("../service/user.service")
+const { userService } = require("../service/user.service")
 const { AVATAR_PATH } = require('../constants/file-types')
 
 class UserController {

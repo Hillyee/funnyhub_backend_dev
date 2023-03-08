@@ -6,15 +6,24 @@ class CommentController {
     const userId = ctx.user.id
     const result = await service.create(momentId, content, userId)
 
-    ctx.body = result
+    ctx.body = {
+      code: 200,
+      message: '发表成功',
+      data: null
+    }
   }
 
   async reply(ctx, next) {
-    const { momentId, content } = ctx.request.body
+    const { momentId, content, beUserId } = ctx.request.body
     const userId = ctx.user.id
+    console.log(userId);
     const { commentId } = ctx.params
-    const result = await service.reply(momentId, content, userId, commentId)
-    ctx.body = result
+    const result = await service.reply(momentId, commentId, content, userId, beUserId)
+    ctx.body = {
+      code: 200,
+      message: '发表成功',
+      data: null
+    }
   }
 
   async update(ctx, next) {
@@ -31,10 +40,22 @@ class CommentController {
   }
 
   async list(ctx, next) {
-    const { momentId } = ctx.query
-    const result = await service.getCommentsByMomentId(momentId)
-    ctx.body = result
+    const { momentId, limit, offset } = ctx.query
+    const result = await service.getCommentsByMomentId(momentId, limit, offset)
+    ctx.body = {
+      code: 200,
+      data: result,
+    }
   }
+  async replylist(ctx, next) {
+    const { momentId, commentId, limit, offset } = ctx.query
+    const result = await service.getReplyByCommentId(momentId, commentId, limit, offset)
+    ctx.body = {
+      code: 200,
+      data: result,
+    }
+  }
+
 }
 
 

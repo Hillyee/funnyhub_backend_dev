@@ -1,5 +1,5 @@
 const errorTypes = require("../constants/error-types")
-const userService = require("../service/user.service")
+const { userService } = require("../service/user.service")
 const authService = require('../service/auth.service')
 const md5password = require("../uitls/password-handle")
 const jwt = require("jsonwebtoken")
