@@ -1,4 +1,4 @@
-const { connection, sequelize } = require("../app/database")
+const { sequelize } = require("../app/database")
 const { DataTypes, Model, Op } = require('sequelize')
 const { User } = require('./user.service')
 
@@ -116,19 +116,14 @@ class CommentService {
     return res
   }
 
-  async update(commentId, content) {
-    const statement = `UPDATE comment SET content = ? WHERE id = ?;`
-    const [result] = await connection.execute(statement, [content, commentId])
-    return result
-  }
-
   async remove(commentId) {
-    const statement = `DELETE FROM comment WHERE id = ?;`
-    const [result] = await connection.execute(statement, [commentId])
-    return result
+    const res = await Comment.destroy({
+      where: {
+        id: commentId
+      }
+    })
+    return res
   }
-
-
 }
 
 module.exports = new CommentService()

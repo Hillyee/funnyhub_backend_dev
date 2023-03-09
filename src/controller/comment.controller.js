@@ -16,7 +16,6 @@ class CommentController {
   async reply(ctx, next) {
     const { momentId, content, beUserId } = ctx.request.body
     const userId = ctx.user.id
-    console.log(userId);
     const { commentId } = ctx.params
     const result = await service.reply(momentId, commentId, content, userId, beUserId)
     ctx.body = {
@@ -36,7 +35,11 @@ class CommentController {
   async remove(ctx, next) {
     const { commentId } = ctx.params
     const result = await service.remove(commentId)
-    ctx.body = result
+    ctx.body = {
+      code: 200,
+      data: null,
+      message: '删除成功'
+    }
   }
 
   async list(ctx, next) {

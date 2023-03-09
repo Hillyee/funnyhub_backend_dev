@@ -99,6 +99,7 @@ class MomentService {
               [Op.substring]: `${wd}`
             }
           }
+
         ]
       },
     })
