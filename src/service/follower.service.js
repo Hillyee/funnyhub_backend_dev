@@ -1,4 +1,4 @@
-const { connection, sequelize } = require("../app/database")
+const { sequelize } = require("../app/database")
 const { DataTypes, Model, Op } = require('sequelize')
 const { User } = require('./user.service')
 

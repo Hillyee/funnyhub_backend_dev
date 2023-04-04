@@ -1,5 +1,7 @@
 const { connection, sequelize } = require("../app/database")
 const { DataTypes, Model, Op } = require('sequelize')
+const { MomentLabel, Label } = require('./label.service')
+const { User } = require('./user.service')
 
 class Moment extends Model { }
 Moment.init({
@@ -14,7 +16,8 @@ Moment.init({
   updateAt: DataTypes.TIME,
   title: DataTypes.STRING,
   description: DataTypes.STRING,
-  moment_url: DataTypes.STRING
+  moment_url: DataTypes.STRING,
+  like_count: DataTypes.INTEGER
 }, {
   tableName: 'moment',
   createdAt: false, // 如果表里没有这个字段就要把它关掉
@@ -22,6 +25,16 @@ Moment.init({
   sequelize
 })
 
+// 将两张表联系在一起
+// A.belongsToMany(B, { through: 'C', /* 参数 */ });
+// Moment.belongsToMany(Label, { through: MomentLabel, unique: false });
+// Label.belongsToMany(Moment, { through: MomentLabel, unique: false });
+
+
+Moment.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'author'
+})
 class MomentService {
   async create(userId, title, content, description, momentUrl) {
     const res = await Moment.create({
@@ -29,7 +42,8 @@ class MomentService {
       title: title,
       content: content,
       description: description,
-      moment_url: momentUrl
+      moment_url: momentUrl,
+      like_count: 0
     })
     return res
   }
@@ -49,6 +63,7 @@ class MomentService {
     const res = Moment.findAndCountAll({
       where: {
         user_id: userId,
+
       },
     })
     return res
@@ -80,6 +95,11 @@ class MomentService {
   // 模糊查询文章内容
   async search(wd, limit, offset) {
     const res = await Moment.findAll({
+      attributes: ['id', 'content', 'description', ['like_count', 'likeCount'], 'moment_url', 'title', 'updateAt', 'user_id'],
+      include: {
+        model: User,
+        as: 'author'
+      },
       limit: limit - 0,
       offset: offset - 0,
       where: {
@@ -129,7 +149,7 @@ class MomentService {
   async getMomentList(limit, offset) {
     const statement = `
       SELECT 
-        m.id id, m.title title,m.content content, m.description description, m.createAt createTime, m.updateAt updateTime, m.moment_url momentUrl,
+        m.id id, m.title title,m.content content, m.description description, m.createAt createTime, m.updateAt updateTime, m.moment_url momentUrl, m.like_count likeCount,
         JSON_OBJECT('id', u.id, 'name', u.name, 'avatarURL', u.avatar_url) author,
         IF(COUNT(l.id), JSON_ARRAYAGG(
           JSON_OBJECT('id', l.id, 'name', l.name)
@@ -146,18 +166,38 @@ class MomentService {
     return result
   }
 
-  async hasLabel(momentId, labelId) {
-    const statement = `SELECT * FROM moment_label WHERE moment_id = ? AND label_id = ?;`
-    const [result] = await connection.execute(statement, [momentId, labelId])
-    return result[0] ? true : false
-  }
+  // 更改赞数
+  async updateLikeCount(momentId, operate) {
+    const res = await Moment.findAll({
+      attributes: ['like_count'],
+      where: {
+        id: momentId
+      }
+    })
+    const count = res[0].dataValues.like_count
+    if (operate == 'add') {
+      await Moment.update({
+        like_count: count + 1
+      }, {
+        where: {
+          id: momentId
+        }
+      })
+    } else {
+      await Moment.update({
+        like_count: count - 1
+      }, {
+        where: {
+          id: momentId
+        }
+      })
+    }
 
-  async addLabel(momentId, labelId) {
-    const statement = `INSERT INTO moment_label (moment_id, label_id) VALUES (?, ?);`
-    const [result] = await connection.execute(statement, [momentId, labelId])
-    return result
   }
 }
 
-module.exports = new MomentService()
+module.exports = {
+  MomentService: new MomentService(),
+  Moment
+}
 

@@ -7,6 +7,7 @@ const { verifyAuth, verifyPermission } = require('../middleware/auth.middleware'
 
 const userRouter = new Router({ prefix: '/users' })
 
+// 注册
 userRouter.post('/', verifyUser, handlePassword, create)
 // 获取头像信息
 userRouter.get('/:userId/avatar', avatarInfo)

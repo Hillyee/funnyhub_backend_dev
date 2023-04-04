@@ -1,5 +1,5 @@
 const fs = require("fs")
-const momentService = require("../service/moment.service")
+const { MomentService } = require("../service/moment.service")
 const fileService = require("../service/file.service")
 const { PICTURE_PATH } = require("../constants/file-types")
 
@@ -13,7 +13,7 @@ class MomentController {
     const momentUrl = ctx.request.body.momentUrl
 
     // 2.将数据插入到数据库
-    const result = await momentService.create(userId, title, content, description, momentUrl)
+    const result = await MomentService.create(userId, title, content, description, momentUrl)
     if (result.dataValues.id) {
       ctx.body = {
         code: 200,
@@ -27,7 +27,7 @@ class MomentController {
     // 1.获取数据
     const momentId = ctx.params.momentId
     // 2.去数据库查询数据
-    const result = await momentService.getMomentById(momentId)
+    const result = await MomentService.getMomentById(momentId)
     if (!result) {
       ctx.body = {
         code: 200,
@@ -43,7 +43,7 @@ class MomentController {
 
   async list(ctx, next) {
     const { limit, offset } = ctx.query
-    const result = await momentService.getMomentList(limit, offset)
+    const result = await MomentService.getMomentList(limit, offset)
     ctx.body = {
       code: 200,
       data: result,
@@ -53,7 +53,7 @@ class MomentController {
   async userList(ctx, next) {
     // const { limit } = ctx.request.query
     const id = ctx.params.userId
-    const result = await momentService.getUserMomentList(id)
+    const result = await MomentService.getUserMomentList(id)
     ctx.body = {
       code: 200,
       data: result.rows
@@ -64,7 +64,7 @@ class MomentController {
     const { momentId } = ctx.params
     const { content, title, description, momentUrl } = ctx.request.body
 
-    const result = await momentService.update(momentId, content, title, description, momentUrl)
+    const result = await MomentService.update(momentId, content, title, description, momentUrl)
 
     ctx.body = {
       code: 200,
@@ -82,28 +82,10 @@ class MomentController {
   async remove(ctx, next) {
     const { momentId } = ctx.params
 
-    await momentService.remove(momentId)
+    await MomentService.remove(momentId)
     ctx.body = {
       code: 200,
       message: '删除成功'
-    }
-  }
-
-  async addLabels(ctx, next) {
-    const { momentId } = ctx.params
-    const { labels } = ctx
-    // 添加所有的标签
-    for (let label of labels) {
-      // 判断标签是否已经跟动态有关系
-      const isExist = await momentService.hasLabel(momentId, label.id)
-      if (!isExist) {
-        await momentService.addLabel(momentId, label.id)
-      }
-    }
-
-    ctx.body = {
-      code: 200,
-      message: "给动态添加标签成功",
     }
   }
 
@@ -116,7 +98,7 @@ class MomentController {
       if (types.some((item) => item === type)) {
         filename = filename + "-" + type
       }
-      ctx.response.set("content-type", fileInfo[0].dataValues.mimetype)
+      ctx.response.set("content-type", fileInfo[0]?.dataValues.mimetype)
       ctx.body = fs.createReadStream(`${PICTURE_PATH}/${filename}`)
     } catch (error) {
       console.log(error)
@@ -125,7 +107,7 @@ class MomentController {
 
   async fuzzyList(ctx, next) {
     const { word, limit, offset } = ctx.query
-    const momentList = await momentService.search(word, limit, offset)
+    const momentList = await MomentService.search(word, limit, offset)
     ctx.body = {
       code: 200,
       data: momentList

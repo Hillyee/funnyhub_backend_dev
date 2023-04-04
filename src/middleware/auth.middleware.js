@@ -20,6 +20,7 @@ const verifyLogin = async (ctx, next) => {
 
   const user = result[0].dataValues
   if (JSON.stringify(user) === "{}") {
+    console.log('用户不存在');
     const error = new Error(errorTypes.USER_DOES_NOT_EXISTS)
     return ctx.app.emit("error", error, ctx)
   }

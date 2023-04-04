@@ -27,9 +27,6 @@ momentRouter.patch('/:momentId', verifyAuth, verifyPermission, update)
 // 删除某一条动态
 momentRouter.delete('/:momentId', verifyAuth, verifyPermission, remove)
 
-// 给动态添加标签
-momentRouter.post('/:momentId/labels', verifyAuth, verifyPermission, verifyLabelExists, addLabels)
-
 // 动态配图的服务
 momentRouter.get('/images/:filename', fileInfo)
 
