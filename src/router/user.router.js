@@ -1,9 +1,9 @@
 const Router = require('koa-router')
 
-const { create, avatarInfo, userInfo, update, currentUserInfo } = require('../controller/user.controller')
+const { create, avatarInfo, userInfo, update, currentUserInfo, updatePassword, getUsers, deleteUser } = require('../controller/user.controller')
 
-const { verifyUser, handlePassword } = require('../middleware/user.middleware')
-const { verifyAuth, verifyPermission } = require('../middleware/auth.middleware')
+const { verifyUser, handlePassword, handlePassword2 } = require('../middleware/user.middleware')
+const { verifyAuth, verifyPermission, verifyLogin } = require('../middleware/auth.middleware')
 
 const userRouter = new Router({ prefix: '/users' })
 
@@ -20,5 +20,14 @@ userRouter.get('/:id/message', userInfo)
 
 // 修改用户信息
 userRouter.post('/update/user_info', verifyAuth, update)
+
+// 修改密码
+userRouter.post('/update/pwd', verifyAuth, verifyLogin, handlePassword2, updatePassword)
+
+// 获取所有用户信息
+userRouter.get('/', getUsers)
+
+// 删除用户
+userRouter.delete('/:id', deleteUser)
 
 module.exports = userRouter

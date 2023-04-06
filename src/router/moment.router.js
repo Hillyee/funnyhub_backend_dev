@@ -1,6 +1,6 @@
 const Router = require('koa-router')
 const { verifyAuth, verifyPermission } = require('../middleware/auth.middleware')
-const { create, detail, list, update, remove, addLabels, fileInfo, userList, fuzzyList } = require('../controller/moment.controller')
+const { create, detail, list, update, remove, addLabels, fileInfo, userList, fuzzyList, listCount } = require('../controller/moment.controller')
 const { verifyLabelExists } = require('../middleware/label.middleware')
 
 
@@ -11,6 +11,8 @@ momentRouter.post('/', verifyAuth, create)
 
 // 查询动态列表
 momentRouter.get('/', list)
+
+momentRouter.get('/count', listCount)
 
 // 查询某用户的动态
 momentRouter.get('/:userId/list', userList)
@@ -26,6 +28,7 @@ momentRouter.patch('/:momentId', verifyAuth, verifyPermission, update)
 
 // 删除某一条动态
 momentRouter.delete('/:momentId', verifyAuth, verifyPermission, remove)
+momentRouter.delete('/admin/:momentId', remove)
 
 // 动态配图的服务
 momentRouter.get('/images/:filename', fileInfo)

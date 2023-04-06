@@ -42,6 +42,16 @@ class LabelController {
       data: result
     }
   }
+
+  async deleteLabel(ctx, next) {
+    const { id } = ctx.params
+    const result = await LabelService.delete(id)
+    ctx.body = {
+      code: 200,
+      data: null,
+      message: '删除成功'
+    }
+  }
 }
 
 module.exports = new LabelController()

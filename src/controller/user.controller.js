@@ -61,6 +61,44 @@ class UserController {
       }
     }
   }
+
+  async updatePassword(ctx, next) {
+    const id = ctx.user.id
+    const { newPassword } = ctx.request.body
+    const result = await userService.updateUserPassWord(id, newPassword)
+    if (result[0] == 0) {
+      ctx.body = {
+        code: 400,
+        data: null,
+        message: '修改用户信息失败'
+      }
+    } else {
+      ctx.body = {
+        code: 200,
+        data: null,
+        message: '修改用户信息成功'
+      }
+    }
+  }
+
+  async getUsers(ctx, next) {
+    const { offset, limit } = ctx.request.query
+    const result = await userService.getAllUsers(limit, offset)
+    ctx.body = {
+      code: 200,
+      data: result
+    }
+  }
+
+  async deleteUser(ctx, next) {
+    const { id } = ctx.params
+    const result = await userService.deleteUserById(id)
+    ctx.body = {
+      code: 200,
+      data: null,
+      message: '删除成功'
+    }
+  }
 }
 
 module.exports = new UserController()

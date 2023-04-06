@@ -27,7 +27,6 @@ MomentLabel.init({
   moment_id: {
     field: 'moment_id',
     type: DataTypes.INTEGER,
-    primaryKey: true,
     unique: false,
     references: {
       model: Moment,
@@ -68,9 +67,12 @@ class LabelService {
   }
 
   async getLabels(offset, limit) {
-    const statement = `SELECT * FROM label LIMIT ?, ?;`
-    const [result] = await connection.execute(statement, [offset, limit])
-    return result
+    const res = await Label.findAndCountAll({
+      attributes: ['id', 'name', 'createAt'],
+      limit: limit - 0,
+      offset: offset - 0
+    })
+    return res
   }
 
   async hasLabel(momentId, labelId) {
@@ -88,6 +90,15 @@ class LabelService {
     })
     return result
   }
+
+  async delete(id) {
+    const result = Label.destroy({
+      where: {
+        id: id
+      }
+    })
+    return result
+  }
 }
 
-module.exports = { LabelService: new LabelService(), Label, MomentLabel };
+module.exports = { LabelService: new LabelService() };

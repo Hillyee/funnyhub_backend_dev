@@ -113,6 +113,14 @@ class MomentController {
       data: momentList
     }
   }
+
+  async listCount(ctx, next) {
+    const res = await MomentService.getMomentCount()
+    ctx.body = {
+      code: 200,
+      data: res
+    }
+  }
 }
 
 module.exports = new MomentController()

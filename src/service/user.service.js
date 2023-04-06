@@ -14,6 +14,7 @@ User.init({
   password: DataTypes.STRING,
   avatar_url: DataTypes.STRING,
   sign: DataTypes.STRING,
+  isadmin: DataTypes.INTEGER,
   createAt: DataTypes.TIME,
   updateAt: DataTypes.TIME
 }, {
@@ -82,6 +83,35 @@ class UserService {
       email: email,
       sign: sign
     }, {
+      where: {
+        id: id
+      }
+    })
+    return res
+  }
+
+  async updateUserPassWord(id, password) {
+    const res = User.update({
+      password: password
+    }, {
+      where: {
+        id: id
+      }
+    })
+    return res
+  }
+
+  async getAllUsers(limit, offset) {
+    const res = await User.findAndCountAll({
+      attributes: ['id', 'name', 'email', ['avatar_url', 'avatarUrl'], 'sign', 'createAt', 'updateAt'],
+      limit: limit - 0,
+      offset: offset - 0
+    })
+    return res
+  }
+
+  async deleteUserById(id) {
+    const res = await User.destroy({
       where: {
         id: id
       }

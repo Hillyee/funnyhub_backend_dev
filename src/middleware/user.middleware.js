@@ -29,8 +29,16 @@ const handlePassword = async (ctx, next) => {
   await next()
 }
 
+const handlePassword2 = async (ctx, next) => {
+  const { newPassword } = ctx.request.body
+  ctx.request.body.newPassword = md5password(newPassword)
+
+  await next()
+}
+
 
 module.exports = {
   verifyUser,
-  handlePassword
+  handlePassword,
+  handlePassword2
 }

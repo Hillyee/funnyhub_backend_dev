@@ -26,15 +26,11 @@ Moment.init({
 })
 
 // 将两张表联系在一起
-// A.belongsToMany(B, { through: 'C', /* 参数 */ });
-// Moment.belongsToMany(Label, { through: MomentLabel, unique: false });
-// Label.belongsToMany(Moment, { through: MomentLabel, unique: false });
-
-
 Moment.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'author'
 })
+
 class MomentService {
   async create(userId, title, content, description, momentUrl) {
     const res = await Moment.create({
@@ -193,6 +189,12 @@ class MomentService {
       })
     }
 
+  }
+
+  // 查询文章总数
+  async getMomentCount() {
+    const res = await Moment.count()
+    return res
   }
 }
 
