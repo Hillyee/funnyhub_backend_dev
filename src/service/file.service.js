@@ -1,4 +1,4 @@
-const { connection, sequelize } = require("../app/database")
+const { sequelize } = require("../app/database")
 const { DataTypes, Model } = require('sequelize')
 
 class Avatar extends Model { }

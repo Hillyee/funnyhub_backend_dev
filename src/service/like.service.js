@@ -3,6 +3,11 @@ const { DataTypes, Model, Op } = require('sequelize')
 
 class Like extends Model { }
 Like.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   moment_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,

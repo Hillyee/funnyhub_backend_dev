@@ -3,9 +3,8 @@ const { connection, sequelize } = require('../app/database');
 const { DataTypes, Model, Op } = require('sequelize')
 const { Moment } = require('./moment.service')
 
-
 class Label extends Model { }
-class MomentLabel extends Model { }
+class Moment_Label extends Model { }
 
 Label.init({
   id: {
@@ -14,40 +13,46 @@ Label.init({
     autoIncrement: true
   },
   name: {
-    type: DataTypes.STRING
-  }
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  },
+  createAt: DataTypes.TIME,
 }, {
+  sequelize,
+  modelName: 'Label',
   tableName: 'label',
   createdAt: false, // 如果表里没有这个字段就要把它关掉
   updatedAt: false,
-  sequelize
+  freezeTableName: true
 })
 
-MomentLabel.init({
-  moment_id: {
-    field: 'moment_id',
+Moment_Label.init({
+  id: {
     type: DataTypes.INTEGER,
-    unique: false,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  moment_id: {
+    type: DataTypes.INTEGER,
     references: {
       model: Moment,
-      key: 'id',
+      key: 'id'
     }
   },
   label_id: {
-    field: 'label_id',
     type: DataTypes.INTEGER,
     references: {
       model: Label,
-      key: 'id',
+      key: 'id'
     }
-  },
+  }
 }, {
-  tableName: 'moment_label',
-  createdAt: false, // 如果表里没有这个字段就要把它关掉
-  updatedAt: false,
-  id: false,
-  sequelize
-})
+  sequelize,
+  modelName: 'Moment_Label',
+  timestamps: false,
+  freezeTableName: true
+});
 
 class LabelService {
   async create(name) {
@@ -76,7 +81,7 @@ class LabelService {
   }
 
   async hasLabel(momentId, labelId) {
-    const res = await MomentLabel.findAll({
+    const res = await Moment_Label.findAll({
       attributes: ['moment_id'],
       where: { [Op.and]: [{ moment_id: momentId }, { label_id: labelId }] },
     })
@@ -84,7 +89,7 @@ class LabelService {
   }
 
   async addLabel(momentId, labelId) {
-    const result = MomentLabel.create({
+    const result = Moment_Label.create({
       moment_id: momentId,
       label_id: labelId
     })
@@ -101,4 +106,4 @@ class LabelService {
   }
 }
 
-module.exports = { LabelService: new LabelService() };
+module.exports = { Label, Moment_Label, LabelService: new LabelService() };

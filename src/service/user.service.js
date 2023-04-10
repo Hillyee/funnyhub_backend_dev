@@ -69,7 +69,7 @@ class UserService {
 
   async getUserById(id) {
     const res = await User.findAll({
-      attributes: ['id', 'name', ['avatar_url', 'avatarUrl'], 'email', 'sign'],
+      attributes: ['id', 'name', ['avatar_url', 'avatarUrl'], 'email', 'sign', 'isadmin'],
       where: {
         id: id
       }

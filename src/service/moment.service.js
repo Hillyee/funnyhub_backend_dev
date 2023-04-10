@@ -1,9 +1,10 @@
 const { connection, sequelize } = require("../app/database")
 const { DataTypes, Model, Op } = require('sequelize')
-const { MomentLabel, Label } = require('./label.service')
 const { User } = require('./user.service')
 
 class Moment extends Model { }
+class Label extends Model { }
+class Moment_Label extends Model { }
 Moment.init({
   id: {
     type: DataTypes.INTEGER,
@@ -22,14 +23,75 @@ Moment.init({
   tableName: 'moment',
   createdAt: false, // 如果表里没有这个字段就要把它关掉
   updatedAt: false,
-  sequelize
+  sequelize,
+  freezeTableName: true
 })
+
+Label.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true
+  }
+}, {
+  sequelize,
+  modelName: 'Label',
+  tableName: 'label',
+  createdAt: false, // 如果表里没有这个字段就要把它关掉
+  updatedAt: false,
+  freezeTableName: true
+})
+
+Moment_Label.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  moment_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Moment,
+      key: 'id'
+    }
+  },
+  label_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Label,
+      key: 'id'
+    }
+  }
+}, {
+  sequelize,
+  modelName: 'Moment_Label',
+  timestamps: false,
+  freezeTableName: true
+});
 
 // 将两张表联系在一起
 Moment.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'author'
 })
+
+// 定义多对多关联
+Moment.belongsToMany(Label, {
+  through: Moment_Label,
+  foreignKey: 'moment_id',
+  as: 'labels'
+});
+
+Label.belongsToMany(Moment, {
+  through: Moment_Label,
+  foreignKey: 'label_id',
+  as: 'moments'
+});
 
 class MomentService {
   async create(userId, title, content, description, momentUrl) {
@@ -91,13 +153,22 @@ class MomentService {
   // 模糊查询文章内容
   async search(wd, limit, offset) {
     const res = await Moment.findAll({
-      attributes: ['id', 'content', 'description', ['like_count', 'likeCount'], 'moment_url', 'title', 'updateAt', 'user_id'],
-      include: {
-        model: User,
-        as: 'author'
-      },
+      attributes: ['id', 'content', 'description', ['like_count', 'likeCount'], ['moment_url', 'momentUrl'], 'title', ['updateAt', 'updateTime'], 'user_id'],
+      include: [
+        {
+          model: Label,
+          through: { model: Moment_Label, attributes: [] },
+          as: 'labels'
+        },
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'name', 'avatar_url']
+        },
+      ],
       limit: limit - 0,
       offset: offset - 0,
+      order: [['updateAt', 'DESC']],
       where: {
         [Op.or]: [
           {
@@ -124,42 +195,48 @@ class MomentService {
 
   // (SELECT JSON_ARRAYAGG(CONCAT('http://localhost:8888/moment/images/', file.filename)) FROM file WHERE m.id = file.moment_id) images
   async getMomentById(momentId) {
-    const statement = `
-      SELECT 
-        m.id id, m.content content, m.title title, m.description description, m.moment_url momentUrl, m.createAt createTime, m.updateAt updateTime,
-        JSON_OBJECT('id', u.id, 'name', u.name, 'avatarURL', u.avatar_url) author,
-        IF(COUNT(l.id), JSON_ARRAYAGG(
-          JSON_OBJECT('id', l.id, 'name', l.name)
-        ), NULL) labels
-      FROM moment m
-      LEFT JOIN user u ON m.user_id = u.id
-      LEFT JOIN moment_label ml ON m.id = ml.moment_id
-      LEFT JOIN label l ON ml.label_id = l.id
-      WHERE m.id = ?
-      GROUP BY m.id;
-    `
-    const [result] = await connection.execute(statement, [momentId])
-    return result[0]
+    const res = await Moment.findByPk(momentId, {
+      attributes: ['id', 'title', 'description', 'content', 'updateAt', ['moment_url', 'momentUrl'], ['like_count', 'likeCount']],
+      include: [
+        {
+          model: Label,
+          through: { model: Moment_Label, attributes: [] },
+          as: 'labels'
+        },
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'name', 'avatar_url']
+        },
+      ],
+    })
+    return res
   }
 
   async getMomentList(limit, offset) {
-    const statement = `
-      SELECT 
-        m.id id, m.title title,m.content content, m.description description, m.createAt createTime, m.updateAt updateTime, m.moment_url momentUrl, m.like_count likeCount,
-        JSON_OBJECT('id', u.id, 'name', u.name, 'avatarURL', u.avatar_url) author,
-        IF(COUNT(l.id), JSON_ARRAYAGG(
-          JSON_OBJECT('id', l.id, 'name', l.name)
-        ), NULL) labels,
-        (SELECT JSON_ARRAYAGG(CONCAT('http://localhost:8888/moment/images/', file.filename)) FROM file WHERE m.id = file.moment_id) images
-      FROM moment m
-      LEFT JOIN user u ON m.user_id = u.id
-      LEFT JOIN moment_label ml ON m.id = ml.moment_id
-      LEFT JOIN label l ON ml.label_id = l.id
-      GROUP BY m.id
-      LIMIT ? OFFSET ?;
-    `
-    const [result] = await connection.execute(statement, [limit, offset])
-    return result
+    try {
+      const res = await Moment.findAll({
+        attributes: ['id', 'title', 'description', 'content', 'updateAt', 'createAt', ['moment_url', 'momentUrl'], ['like_count', 'likeCount']],
+        include: [
+          {
+            model: Label,
+            through: { model: Moment_Label, attributes: [] },
+            as: 'labels'
+          },
+          {
+            model: User,
+            as: 'author',
+            attributes: ['id', 'name', 'avatar_url']
+          },
+        ],
+        order: [['updateAt', 'DESC']],
+        limit: limit - 0,
+        offset: offset - 0
+      })
+      return res
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // 更改赞数

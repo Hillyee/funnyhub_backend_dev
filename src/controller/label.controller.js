@@ -19,6 +19,7 @@ class LabelController {
   async addLabels(ctx, next) {
     const { momentId } = ctx.params
     const { labels } = ctx
+    console.log(labels);
     // 添加所有的标签
     for (let label of labels) {
       // 判断标签是否已经跟动态有关系
